@@ -4,7 +4,10 @@ on:
   pull_request:
   push:
     branches:
+      # On upstream: only run on main
       - main
+      # On forks: run on all branches
+      - "**"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -12,7 +15,6 @@ concurrency:
 
 env:
   RAILS_ENV: test
-  # In CI, run Wise and Stripe tests with valid credentials
   NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || 'dummy' }}
   STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY || 'dummy' }}
   WISE_API_KEY: ${{ secrets.WISE_API_KEY || 'dummy' }}
@@ -58,7 +60,7 @@ jobs:
         timeout-minutes: 20
 
   playwright:
-    name: playwright
+    name: Playwright
     runs-on: ${{ github.repository == 'antiwork/flexile' && 'ubicloud-standard-8' || 'ubuntu-latest' }}
 
     steps:
