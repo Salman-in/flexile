@@ -45,7 +45,7 @@ test.describe("Invoice submission, approval and rejection", () => {
     await page.getByPlaceholder("Description").nth(1).fill("second item");
     await page.getByLabel("Hours / Qty").nth(1).fill("10");
     await page.getByPlaceholder("Enter notes about your").fill("A note in the invoice");
-    await page.waitForTimeout(200); // TODO (dani) avoid this
+    await page.getByPlaceholder("Enter notes about your").blur();
     await page.getByRole("button", { name: "Send invoice" }).click();
 
     await expect(page.getByRole("cell", { name: "CUSTOM-1" })).toBeVisible();
@@ -201,6 +201,7 @@ test.describe("Invoice submission, approval and rejection", () => {
     await page.getByRole("menuitem", { name: "Edit" }).click();
     await expect(page.getByRole("heading", { name: "Edit invoice" })).toBeVisible();
     await page.getByLabel("Hours / Qty").fill("02:30");
+    await page.getByLabel("Hours / Qty").blur(); // Trigger calculation
     await page.getByPlaceholder("Enter notes about your").fill("fixed hours");
     await page.getByRole("button", { name: "Re-submit invoice" }).click();
     await expect(page.getByRole("heading", { name: "Invoices" })).toBeVisible();
