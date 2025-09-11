@@ -48,8 +48,16 @@ test.describe("Leave company", () => {
     const { company } = await companiesFactory.createCompletedOnboarding();
     const { user } = await usersFactory.create();
 
+    // Create a second company where the user is also an investor
+    const { company: secondCompany } = await companiesFactory.createCompletedOnboarding();
+
     await companyInvestorsFactory.create({
       companyId: company.id,
+      userId: user.id,
+    });
+
+    await companyInvestorsFactory.create({
+      companyId: secondCompany.id,
       userId: user.id,
     });
 
@@ -61,20 +69,34 @@ test.describe("Leave company", () => {
     await expect(page.getByText("Leave this workspace?")).toBeVisible();
     await page.getByRole("button", { name: "Leave" }).click();
 
-    await expect(page).toHaveURL("/invoices");
+    await expect(page).toHaveURL("/equity/dividends");
 
     const investor = await db.query.companyInvestors.findFirst({
       where: and(eq(companyInvestors.companyId, company.id), eq(companyInvestors.userId, user.id)),
     });
     expect(investor).toBeUndefined();
+
+    // Should still be investor in second company
+    const remainingInvestor = await db.query.companyInvestors.findFirst({
+      where: and(eq(companyInvestors.companyId, secondCompany.id), eq(companyInvestors.userId, user.id)),
+    });
+    expect(remainingInvestor).toBeDefined();
   });
 
   test("lawyer can leave successfully", async ({ page }) => {
     const { company } = await companiesFactory.createCompletedOnboarding();
     const { user } = await usersFactory.create();
 
+    // Create a second company where the user is also a lawyer
+    const { company: secondCompany } = await companiesFactory.createCompletedOnboarding();
+
     await companyLawyersFactory.create({
       companyId: company.id,
+      userId: user.id,
+    });
+
+    await companyLawyersFactory.create({
+      companyId: secondCompany.id,
       userId: user.id,
     });
 
@@ -86,12 +108,18 @@ test.describe("Leave company", () => {
     await expect(page.getByText("Leave this workspace?")).toBeVisible();
     await page.getByRole("button", { name: "Leave" }).click();
 
-    await expect(page).toHaveURL("/invoices");
+    await expect(page).toHaveURL("/documents");
 
     const lawyer = await db.query.companyLawyers.findFirst({
       where: and(eq(companyLawyers.companyId, company.id), eq(companyLawyers.userId, user.id)),
     });
     expect(lawyer).toBeUndefined();
+
+    // Should still be lawyer in second company
+    const remainingLawyer = await db.query.companyLawyers.findFirst({
+      where: and(eq(companyLawyers.companyId, secondCompany.id), eq(companyLawyers.userId, user.id)),
+    });
+    expect(remainingLawyer).toBeDefined();
   });
 
   test("user with multiple roles can leave successfully", async ({ page }) => {
