@@ -1,14 +1,12 @@
 "use client";
 
 import { useQueryClient } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
 import { useCallback } from "react";
 import { useCurrentUser, useUserStore } from "@/global";
 import { request } from "@/utils/request";
-import { company_switch_path } from "@/utils/routes";
+import { internal_current_user_data_path } from "@/utils/routes";
 
 export const useSwitchCompany = () => {
-  const router = useRouter();
   const user = useCurrentUser();
   const queryClient = useQueryClient();
 
@@ -16,18 +14,19 @@ export const useSwitchCompany = () => {
     async (companyId: string) => {
       useUserStore.setState((state) => ({ ...state, pending: true }));
       try {
-        await request({
-          method: "POST",
-          url: company_switch_path(companyId),
+        const response = await request({
+          method: "GET",
+          url: `${internal_current_user_data_path()}?company_id=${companyId}`,
           accept: "json",
         });
+        const userData = await response.json();
+        useUserStore.getState().login(userData);
         await queryClient.resetQueries({ queryKey: ["currentUser", user.email] });
-        router.refresh();
       } finally {
         useUserStore.setState((state) => ({ ...state, pending: false }));
       }
     },
-    [user.email, queryClient, router],
+    [user.email, queryClient],
   );
 
   return { switchCompany };
