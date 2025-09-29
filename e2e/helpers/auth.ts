@@ -23,19 +23,13 @@ export const login = async (page: Page, user: typeof users.$inferSelect, redirec
 };
 
 export const logout = async (page: Page) => {
-  if (page.url().includes("/login")) {
+  if (page.isClosed() || page.url().includes("/login")) {
     return;
   }
-  const button = page.getByRole("button", { name: "Log out" }).first();
-  if (!(await button.isVisible())) {
-    // Navigate to invoices page to ensure we're on a dashboard page with sidebar
-    await page.goto("/invoices");
-    await page.waitForLoadState("networkidle");
-  }
-  await button.click();
 
-  // Wait for redirect to login
-  await page.waitForURL(/.*\/login.*/u);
+  // Clear cookies to ensure proper logout
+  await page.context().clearCookies();
+  await page.goto("/login");
   await page.waitForLoadState("networkidle");
 };
 
