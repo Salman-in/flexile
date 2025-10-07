@@ -26,13 +26,14 @@ export const logout = async (page: Page) => {
   if (page.url().includes("/login")) {
     return;
   }
+
+  // Navigate to invoices page to ensure we're on a dashboard page with sidebar
+  await page.goto("/invoices");
+  await page.waitForLoadState("networkidle");
+
   const button = page.getByRole("button", { name: "Log out" }).first();
-  if (!(await button.isVisible())) {
-    // Navigate to invoices page to ensure we're on a dashboard page with sidebar
-    await page.goto("/invoices");
-    await page.waitForLoadState("networkidle");
-  }
-  await button.click();
+  await button.waitFor({ state: "visible", timeout: 10000 });
+  await button.click({ force: true });
 
   // Wait for redirect to login
   await page.waitForURL(/.*\/login.*/u);
