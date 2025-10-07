@@ -12,6 +12,7 @@ concurrency:
 
 env:
   RAILS_ENV: test
+  TZ: UTC
   # In CI, run Wise and Stripe tests with valid credentials
   NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || 'dummy' }}
   STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY || 'dummy' }}
